@@ -4,7 +4,7 @@ package edu.hsutx;
  * @author Todd Dole
  * @version 1.0
  * Starting Code for the CSCI-3323 Red-Black Tree assignment
- * Students must complete the TODOs and get the tests to pass
+ * Students must complete the todos and get the tests to pass
  */
 
 /**
@@ -14,7 +14,8 @@ package edu.hsutx;
  * 2. The root is always black.
  * 3. Every leaf (NIL node) is black.
  * 4. If a node is red, then both its children are black.
- * 5. For each node, all simple paths from the node to descendant leaves have the same number of black nodes.
+ * 5. For each node, all simple paths from the node to descendant leaves have
+ * the same number of black nodes.
  */
 public class RedBlackTree<E> {
     Node root;
@@ -39,19 +40,39 @@ public class RedBlackTree<E> {
 
         // TODO - add comments as appropriate including a javadoc for each method
         public int getDepth() {
-            // TODO - calculate the depth of the node and return an int value.
+            // todo - calculate the depth of the node and return an int value.
             // Hint: follow parent pointers up to the root and count steps
-            return 0;
+
+            Node par = this.parent;
+            int count = 1;
+            while (par != null) {
+                par = par.parent;
+                count++;
+            }
+
+            return count;
+
         }
 
         public int getBlackDepth() {
-            // TODO - calculate the depth of the node counting only black nodes and return an int value
-            return 0;
+            // todo - calculate the depth of the node counting only black nodes and return
+            // an int value
+            Node par = this.parent;
+            int count = 1;
+            while (par != null) {
+                par = par.parent;
+                if (!par.color) {
+                    count++;
+                }
+            }
+
+            return count;
         }
     }
 
     public RedBlackTree() {
-        root = null; // Start with an empty tree.  This is the one time we can have a null ptr instead of a null key node
+        root = null; // Start with an empty tree. This is the one time we can have a null ptr instead
+                     // of a null key node
         size = 0;
     }
 
@@ -69,19 +90,22 @@ public class RedBlackTree<E> {
         // 1. Node to be deleted has no children
         // 2. Node to be deleted has one child
         // 3. Node to be deleted has two children
-        // Additionally, you must handle rebalancing after deletion to restore Red-Black Tree properties
+        // Additionally, you must handle rebalancing after deletion to restore Red-Black
+        // Tree properties
         // make sure to subtract one from size if node is successfully added
     }
 
     private void fixInsertion(Node node) {
         // TODO - Implement the fix-up procedure after insertion
-        // Ensure that Red-Black Tree properties are maintained (recoloring and rotations).
+        // Ensure that Red-Black Tree properties are maintained (recoloring and
+        // rotations).
         // Hint: You will need to deal with red-red parent-child conflicts
     }
 
     private void fixDeletion(Node node) {
         // TODO - Implement the fix-up procedure after deletion
-        // Ensure that Red-Black Tree properties are maintained (recoloring and rotations).
+        // Ensure that Red-Black Tree properties are maintained (recoloring and
+        // rotations).
     }
 
     private void rotateLeft(Node node) {
@@ -114,7 +138,8 @@ public class RedBlackTree<E> {
     // returns the depth of the node with key, or 0 if it doesn't exist
     public int getDepth(String key) {
         Node node = find(key);
-        if (node != null) return node.getDepth();
+        if (node != null)
+            return node.getDepth();
         return 0;
     }
 
@@ -126,6 +151,7 @@ public class RedBlackTree<E> {
     private boolean isBlack(Node node) {
         return node == null || node.color == false; // Black is false, and null nodes are black
     }
+
     public int getSize() {
         return size;
     }
@@ -155,7 +181,8 @@ public class RedBlackTree<E> {
             return blackCount == expectedBlackCount; // Ensure every path has the same black count
         }
 
-        // Rule 1: Node is either red or black (implicit since we use a boolean color field)
+        // Rule 1: Node is either red or black (implicit since we use a boolean color
+        // field)
 
         // Rule 4: If a node is red, its children must be black
         if (isRed(node)) {
@@ -166,7 +193,8 @@ public class RedBlackTree<E> {
             blackCount++; // Increment black node count on this path
         }
 
-        // Recurse on left and right subtrees, ensuring they maintain the Red-Black properties
+        // Recurse on left and right subtrees, ensuring they maintain the Red-Black
+        // properties
         return validateNode(node.left, blackCount, expectedBlackCount) &&
                 validateNode(node.right, blackCount, expectedBlackCount);
     }
