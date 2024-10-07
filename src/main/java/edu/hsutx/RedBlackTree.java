@@ -40,8 +40,6 @@ public class RedBlackTree<E> {
 
         // TODO - add comments as appropriate including a javadoc for each method
         public int getDepth() {
-            // todo - calculate the depth of the node and return an int value.
-            // Hint: follow parent pointers up to the root and count steps
 
             Node par = this.parent;
             int count = 1;
@@ -77,22 +75,79 @@ public class RedBlackTree<E> {
     }
 
     public void insert(String key, E value) {
-        // TODO - Insert a new node into the tree with key and value
-        // You must handle rebalancing the tree after inserting
-        // 1. Insert the node as you would in a regular BST.
-        // 2. Recolor and rotate to restore Red-Black Tree properties.
-        // Make sure to add 1 to size if node is successfully added
+
+        Node loc = find(key);
+        if (loc == null) {
+            root = new Node(key, value, null, false);
+            root.left = new Node(null, null, root, false);
+            root.right = new Node(null, null, root, false);
+            return;
+        }
+
+        if (loc.key != null) {
+            return;
+        }
+        loc.key = key;
+        loc.value = value;
+        loc.color = true;
+        loc.left = new Node(null, null, loc, false);
+        loc.right = new Node(null, null, loc, false);
+        size++;
+        if (isRed(loc.parent)) {
+            fixInsertion(loc);
+        }
     }
 
     public void delete(String key) {
-        // TODO - Implement deletion for a Red-Black Tree
         // Will need to handle three cases similar to the Binary Search Tree
         // 1. Node to be deleted has no children
         // 2. Node to be deleted has one child
         // 3. Node to be deleted has two children
         // Additionally, you must handle rebalancing after deletion to restore Red-Black
         // Tree properties
-        // make sure to subtract one from size if node is successfully added
+        // make sure to subtract one from size if node is successfully removed
+
+        Node loc = find(key);
+        if (loc == null || loc.key == null) {
+            return;
+        }
+
+        if (loc.left.key == null && loc.right.key == null) {
+            if (loc == root) {
+                root = null;
+                size = 0;
+                return;
+            }
+            loc.left = null;
+            loc.right = null;
+            loc.key = null;
+            loc.value = null;
+            loc.color = false;
+        } else if (loc.left.key == null) {
+            if (loc == root) {
+                root = loc.right;
+            } else {
+                loc.parent.right = loc.right;
+            }
+        } else if (loc.right.key == null) {
+            if (loc == root) {
+                root = loc.left;
+            } else {
+                loc.parent.left = loc.left;
+            }
+        } else if (loc.left.key != null && loc.right.key != null) {
+            Node successor = loc.right;
+            while (successor.left != null) {
+                successor = successor.left;
+            }
+            E srValue = successor.value;
+            String srKey = successor.key;
+            delete(successor.key);
+            loc.value = srValue;
+            loc.key = srKey;
+        }
+        size--;
+        fixDeletion(loc);
     }
 
     private void fixInsertion(Node node) {
@@ -100,6 +155,17 @@ public class RedBlackTree<E> {
         // Ensure that Red-Black Tree properties are maintained (recoloring and
         // rotations).
         // Hint: You will need to deal with red-red parent-child conflicts
+
+        Node gp = node.parent.parent;
+        Node lc = gp.left;
+        Node rc = gp.right;
+
+        if (isRed(lc) && isRed(rc)) {
+            gp.color = !gp.color;
+            lc.color = !lc.color;
+            rc.color = !rc.color;
+        }
+
     }
 
     private void fixDeletion(Node node) {
@@ -119,16 +185,39 @@ public class RedBlackTree<E> {
     }
 
     Node find(String key) {
-        // TODO - Search for the node with the given key
-        // If the key exists in the tree, return the Node where it is located
-        // Otherwise, return null
-        return null;
+
+        if (isEmpty()) {
+            return null;
+        }
+
+        Node node = root;
+        while (key != node.key) {
+            if (key.compareToIgnoreCase(node.key) < 0) {
+                if (node.left.key == null) {
+                    return node.left;
+                }
+                node = node.left;
+            } else {
+                if (node.right.key == null) {
+                    return node.right;
+                }
+                node = node.right;
+            }
+        }
+
+        return node;
+
     }
 
     public E getValue(String key) {
-        // TODO - Use find() to locate the node with the given key and return its value
-        // If the key does not exist, return null
-        return null;
+
+        Node loc = find(key);
+        if (loc == null || loc.key == null || loc.key != key) {
+            return null;
+        }
+
+        return loc.value;
+
     }
 
     public boolean isEmpty() {
@@ -138,18 +227,19 @@ public class RedBlackTree<E> {
     // returns the depth of the node with key, or 0 if it doesn't exist
     public int getDepth(String key) {
         Node node = find(key);
-        if (node != null)
-            return node.getDepth();
-        return 0;
+        if (node == null || node.key == null) {
+            return 0;
+        }
+        return node.getDepth();
     }
 
     // Helper methods to check the color of a node
     private boolean isRed(Node node) {
-        return node != null && node.color == true; // Red is true
+        return node.key != null && node.color; // Red is true
     }
 
     private boolean isBlack(Node node) {
-        return node == null || node.color == false; // Black is false, and null nodes are black
+        return node.key == null || !node.color; // Black is false, and null nodes are black
     }
 
     public int getSize() {
@@ -174,7 +264,7 @@ public class RedBlackTree<E> {
     // Helper method to check if the current node maintains Red-Black properties
     private boolean validateNode(Node node, int blackCount, int expectedBlackCount) {
         // Rule 3: Null nodes (leaves) are black
-        if (node == null) {
+        if (node.key == null) {
             if (expectedBlackCount == -1) {
                 expectedBlackCount = blackCount; // Set the black count for the first path
             }
