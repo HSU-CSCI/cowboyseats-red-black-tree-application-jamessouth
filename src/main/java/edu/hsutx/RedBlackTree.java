@@ -99,13 +99,6 @@ public class RedBlackTree<E> {
     }
 
     public void delete(String key) {
-        // Will need to handle three cases similar to the Binary Search Tree
-        // 1. Node to be deleted has no children
-        // 2. Node to be deleted has one child
-        // 3. Node to be deleted has two children
-        // Additionally, you must handle rebalancing after deletion to restore Red-Black
-        // Tree properties
-        // make sure to subtract one from size if node is successfully removed
 
         Node loc = find(key);
         if (loc == null || loc.key == null) {
@@ -129,15 +122,19 @@ public class RedBlackTree<E> {
             } else {
                 loc.parent.right = loc.right;
             }
+            fixDeletion(loc);
+
         } else if (loc.right.key == null) {
             if (loc == root) {
                 root = loc.left;
             } else {
                 loc.parent.left = loc.left;
             }
+            fixDeletion(loc);
+
         } else if (loc.left.key != null && loc.right.key != null) {
             Node successor = loc.right;
-            while (successor.left != null) {
+            while (successor.left.key != null) {
                 successor = successor.left;
             }
             E srValue = successor.value;
@@ -145,43 +142,149 @@ public class RedBlackTree<E> {
             delete(successor.key);
             loc.value = srValue;
             loc.key = srKey;
+            fixDeletion(loc);
+
         }
         size--;
-        fixDeletion(loc);
     }
 
     private void fixInsertion(Node node) {
-        // TODO - Implement the fix-up procedure after insertion
-        // Ensure that Red-Black Tree properties are maintained (recoloring and
-        // rotations).
-        // Hint: You will need to deal with red-red parent-child conflicts
 
+        Node newpar = node.parent;
         Node gp = node.parent.parent;
-        Node lc = gp.left;
-        Node rc = gp.right;
+        if (newpar == root) {
 
-        if (isRed(lc) && isRed(rc)) {
-            gp.color = !gp.color;
-            lc.color = !lc.color;
-            rc.color = !rc.color;
+            return;
         }
+
+        Node newunc = null;
+        boolean isNewNodeLeftChild = newpar.left == node;
+        boolean isZigZag = false;
+        if (gp != null) {
+
+            if (gp.left == newpar) {
+                isZigZag = !isNewNodeLeftChild;
+                if (gp.right.key != null) {
+                    newunc = gp.right;
+                }
+            } else {
+                isZigZag = isNewNodeLeftChild;
+                if (gp.left.key != null) {
+                    newunc = gp.left;
+                }
+            }
+
+            if (newunc != null) {
+                if (isRed(newunc)) {
+                    if (gp == root) {
+                        gp.color = false;
+                    } else {
+                        gp.color = !gp.color;
+                    }
+                    newpar.color = !newpar.color;
+                    newunc.color = !newunc.color;
+                    return;
+                } else {
+
+                    if (isNewNodeLeftChild) {
+                        rotateRight(node, isZigZag);
+                    } else {
+                        rotateLeft(node, isZigZag);
+                    }
+
+                }
+            } else {
+                if (gp == root) {
+                    gp.color = false;
+                } else {
+                    gp.color = !gp.color;
+                }
+                newpar.color = !newpar.color;
+            }
+        }
+
+        fixInsertion(newpar);
 
     }
 
     private void fixDeletion(Node node) {
-        // TODO - Implement the fix-up procedure after deletion
-        // Ensure that Red-Black Tree properties are maintained (recoloring and
-        // rotations).
+        fixInsertion(node);
+
     }
 
-    private void rotateLeft(Node node) {
-        // TODO - Implement left rotation
-        // Left rotation is used to restore balance after insertion or deletion
+    private void rotateLeft(Node node, boolean isZigZag) {
+
+        Node par = node.parent;
+        Node gp = par.parent;
+        if (isZigZag) {
+            gp.left = node;
+            par.right = node.left;
+            node.left = par;
+            rotateRight(par, false);
+
+        } else {
+            boolean gpIsRoot = false;
+            if (gp.parent == null) {
+                gpIsRoot = true;
+            }
+            Node alpha = par.left;
+            Node ggp = null;
+
+            if (gpIsRoot) {
+                root = par;
+            } else {
+                ggp = gp.parent;
+                if (ggp.left == gp) {
+                    ggp.left = par;
+                } else {
+                    ggp.right = par;
+                }
+            }
+            par.color = false;
+            par.left = gp;
+            gp.color = true;
+            gp.right = alpha;
+        }
+
     }
 
-    private void rotateRight(Node node) {
-        // TODO - Implement right rotation
-        // Right rotation is used to restore balance after insertion or deletion
+    private void rotateRight(Node node, boolean isZigZag) {
+
+        Node par = node.parent;
+        Node gp = par.parent;
+        if (gp == null) {
+            return;
+        }
+        if (isZigZag) {
+            gp.right = node;
+            par.left = node.right;
+            node.right = par;
+            rotateLeft(par, false);
+
+        } else {
+            boolean gpIsRoot = false;
+            if (gp == root) {
+                gpIsRoot = true;
+            }
+            Node alpha = par.right;
+            Node ggp = null;
+
+            if (gpIsRoot) {
+                root = par;
+            } else {
+                ggp = gp.parent;
+                if (ggp.left == gp) {
+                    ggp.left = par;
+                } else {
+                    ggp.right = par;
+                }
+            }
+            par.color = false;
+            par.right = gp;
+            gp.color = true;
+            gp.left = alpha;
+        }
+
     }
 
     Node find(String key) {
