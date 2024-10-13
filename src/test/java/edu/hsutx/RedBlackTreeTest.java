@@ -138,7 +138,18 @@ public class RedBlackTreeTest {
         tree.insert("t", 30);
         tree.insert("a", 40);
         tree.insert("e", 50);
-        tree.insert("d", 60); // 'c' now has one child 'e'
+        tree.insert("d", 60); // 'c' has two children 'a' and 'e';'e' has one child 'd'
+
+        // tree at this point is:
+        // a, 40, false, left: null, right: null
+        // c, 20, true, left: a, right: e
+        // d, 60, true, left: null, right: null
+        // e, 50, false, left: d, right: null
+        // m, 10, false, left: c, right: t
+        // t, 30, false, left: null, right: null
+
+        // and can be seen with the tool at
+        // https://www.cs.usfca.edu/~galles/visualization/RedBlack.html
 
         tree.delete("e"); // Deleting node 'e' which has one child 'd'
 
@@ -263,8 +274,8 @@ public class RedBlackTreeTest {
         tree.insert("cherry", 3);
 
         assertNotNull(tree.find("banana"), "Find should return a node for existing key.");
-        // assertNull(tree.find("date"), "Find should return null for nonexistent
-        // key.");
+        assertNull(tree.find("date").key, "Find should return null for nonexistent key.");
+        // slightly modified to test key since find returns null NODE
     }
 
     @Test
