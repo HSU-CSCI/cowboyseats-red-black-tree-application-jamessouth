@@ -22,6 +22,6 @@ tasks.test {
 
 application {
     // You can set a default main class here if needed, or leave it unset since we define specific tasks below.
-    mainClass.set("edu.hsutx.CowboySeatsApplication")
+    mainClass.set("edu.hsutx.MainApp")
 }
 
